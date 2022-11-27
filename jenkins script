@@ -1,0 +1,27 @@
+pipeline {
+    agent any
+    environment {
+        PATH = "/opt/maven/apache-maven-3.8.6/bin:$PATH"
+    }
+    stages {
+        stage ("git clone"){
+            steps{
+                git credentialsId: 'git-credentials', url: 'https://github.com/ajnaikka/hllo.git', branch: "main"
+            } 
+            
+        }
+        stage ("build"){
+            steps{
+                sh "mvn clean install"
+            } 
+        }
+        stage ("deploy in tomcat"){
+            steps{
+                sshagent(['tomcat']) {
+                 sh "scp -o StrictHostkeyChecking=no webapp/target/webapp.war ec2-user@13.126.73.19:/opt/apache-tomcat-9.0.69/webapps"
+              // sh "scp <src> username@ip_add:<dest>"  
+}
+            } 
+        }
+    }
+}
